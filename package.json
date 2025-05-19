@@ -1,0 +1,17 @@
+{
+  "name": "backend_simula.invest_fullstack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start:app": "nodemon src/index.js",
+    "start:database": "docker-compose -f docker-compose.database.yml up -d"
+  },
+  "author": "",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
+  }
+}
