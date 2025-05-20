@@ -1,17 +1,27 @@
 {
-  "name": "backend_simula.invest_fullstack",
+  "name": "backend-simula-invest-fullstack",
   "version": "1.0.0",
-  "description": "",
+  "description": "Atividade avaliativa Final - Backend Simula Invest",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
     "start:app": "nodemon src/index.js",
-    "start:database": "docker-compose -f docker-compose.database.yml up -d"
+    "start:database": "docker-compose up -d",
+    "stop:database": "docker-compose down",
+    "generate-secret-key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
   },
   "author": "",
+  "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.15.6",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.10"
   }
 }

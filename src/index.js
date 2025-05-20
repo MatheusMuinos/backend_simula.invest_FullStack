@@ -1,17 +1,31 @@
-import express from 'express';
-import dotenv from 'dotenv';
+import express from "express";
+import cors from "cors";
+import db from "./models/index.js";
+import userRoute from "./routes/user.route.js";
 
-dotenv.config();
+db.sequelize.sync()
+    .then(() => {
+        console.log("Database synchronized");
+    })
+    .catch((error) => {
+        console.error("Error synchronizing database:", error);
+    });
 
 const app = express();
 
-app.use(express.json());
+app.use(cors({
+  origin: '*', 
+  credentials: true
+}));
 
 app.get('/', (req, res) => {
-    res.send({message: 'Hello World!'});
+  res.send('Banco de Dados está no ar!');
 });
+
+app.use(express.json());
+app.use(userRoute);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});  
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
