@@ -1,6 +1,7 @@
 import dbConfig from '../config/db.config.js';
 import { Sequelize } from 'sequelize';
 import User from './User.js';
+import Simulacao from './Simulacao.js';
 import pg from 'pg';
 import dotenv from 'dotenv';
 
@@ -50,5 +51,9 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.users = User(sequelize, Sequelize);
+db.simulacao = Simulacao(sequelize, Sequelize);
+
+db.users.hasMany(db.simulacao, { foreignKey: 'userId' });
+db.simulacao.belongsTo(db.users, { foreignKey: 'userId' });
 
 export default db;
