@@ -3,6 +3,7 @@ import cors from "cors";
 import db from "./models/index.js";
 import userRoute from "./routes/user.route.js";
 import simulacaoRoute from "./routes/simulacao.route.js";
+import swaggerRoute from './routes/swagger.route.js';
 
 db.sequelize.sync()
     .then(() => {
@@ -26,6 +27,7 @@ app.get('/', (req, res) => {
 app.use(express.json());
 app.use(userRoute);
 app.use(simulacaoRoute);
+app.use(swaggerRoute);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
