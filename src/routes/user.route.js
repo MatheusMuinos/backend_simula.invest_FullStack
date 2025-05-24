@@ -6,8 +6,7 @@ import secureController from '../controller/secure.controller.js';
 const router = express.Router();
 
 router.post('/register', userController.register);
-router.post('/login', verifyToken, userController.login);
-router.get('/users', verifyToken, userController.getAllUsers);
-router.get('/secure', verifyToken, secureController.Endpoint);
+router.post('/login', userController.login);
+router.get('/users', userController.getAllUsers);
 
 export default router;
