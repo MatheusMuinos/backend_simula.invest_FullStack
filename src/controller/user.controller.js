@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import db from '../models/index.js';
 import jwt from 'jsonwebtoken';
+import { createUser, findUserByUsername, findUserByEmail } from '../services/user.service.js';
 
 const register = async (req, res) => {
     console.log("Registering user:", req.body);
@@ -8,30 +9,18 @@ const register = async (req, res) => {
         return res.status(400).json({ message: 'username, email and password are required' });
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(req.body.email)) {
-        console.log("Invalid email format:", req.body.email);
-        return res.status(400).json({ message: 'Invalid email format' });
-    }
-
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    if (!passwordRegex.test(req.body.password)) {
-        console.error("Invalid password format:", req.body.password);
-        return res.status(400).json({ message: 'Invalid password format. Password must be at least 8 characters long and include at least one letter and one number.' });
-    }
-
     const { username, email, password } = req.body;
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     try {
-        const savedUser = await db.users.create({
-            username,
-            email,
-            password: hashedPassword,
-        });
-        console.log("User saved:", savedUser);
+        // Verifica se o email ou username já existem
+        const existingUser = await findUserByEmail(email) || await findUserByUsername(username);
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username or email already exists' });
+        }
+
+        // Cria o usuário
+        const user = await createUser({ username, email, password });
+        console.log("User saved:", user);
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
         console.error("Error saving user:", error);
@@ -72,7 +61,7 @@ const login = async (req, res) => {
         }
 
         console.log("User logged in successfully", user.username);
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
         console.error("Error logging in user:", error);
