@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import db from "./models/index.js";
 import userRoute from "./routes/user.route.js";
+import simulacaoRoute from "./routes/simulacao.route.js";
 
 db.sequelize.sync()
     .then(() => {
@@ -24,8 +25,9 @@ app.get('/', (req, res) => {
 
 app.use(express.json());
 app.use(userRoute);
+app.use(simulacaoRoute);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Servidor rodando na porta http://localhost:${PORT}`);
 });
