@@ -1,43 +1,41 @@
 import express from "express";
 import cors from "cors";
-import db from "@models/index.js";
-import userRoute from "@routes/user.route.js";
-import simulacaoRoute from "@routes/simulacao.route.js";
-import swaggerRoute from '@routes/swagger.route.js';
+import db from "./models/index.js";
+import userRoute from "./routes/user.route.js";
+import simulacaoRoute from "./routes/simulacao.route.js";
+import swaggerRoute from './routes/swagger.route.js';
+
+db.sequelize.sync()
+    .then(() => {
+        console.log("Database synced successfully.");
+    })
+.catch((error) => {
+    console.error("Error syncing database:", error);
+});
 
 const app = express();
-
-app.use(cors({
-  origin: '*', 
-  credentials: true
-}));
-
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Banco de Dados está no ar!');
-});
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://legendary-dollop-6q7jp4qvqjv355gx-5173.app.github.dev'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
 app.use(userRoute);
 app.use(simulacaoRoute);
 app.use(swaggerRoute);
 
+app.get('/', (req, res) => {
+    res.send({message: 'Hello World!'});
+});
+
 const PORT = process.env.PORT || 3000;
 
-const isTest = process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test';
-
-if (!isTest) {
-    console.log("Starting server and synchronizing database...");
-    db.sequelize.sync()
-        .then(() => {
-            console.log("Database synchronized.");
-            app.listen(PORT, () => {
-                console.log(`Servidor rodando na porta http://localhost:${PORT}`);
-            });
-        })
-        .catch((error) => {
-            console.error("Error starting server:", error);
-        });
-}
-
-export { app };
+app.listen(3000, () => {
+    console.log(`Server is running on port http://localhost:${PORT}`);
+});
