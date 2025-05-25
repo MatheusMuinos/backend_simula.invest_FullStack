@@ -1,6 +1,6 @@
 import express from 'express';
-import verifyToken from '@middlewares/jwt.token.middleware.js';
-import simulacaoController from '@controller/simulacao.controller.js';
+import verifyToken from '../middlewares/jwt.token.middleware.js';
+import simulacaoController from '../controller/simulacao.controller.js';
 
 const router = express.Router();
 
