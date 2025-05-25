@@ -9,10 +9,9 @@
     "start:database": "docker-compose up -d",
     "stop:database": "docker-compose down",
     "generate-secret-key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
-    "test": "jest --detectOpenHandles --forceExit",
-    "test:unit": "jest src/testes/unit --detectOpenHandles --forceExit",
-    "test:integration": "jest src/testes/integration --detectOpenHandles --forceExit",
-    "test:coverage": "jest --coverage"
+    "test": "jest --detectOpenHandles --forceExit --runInBand --coverage",
+    "test:unit": "jest src/testes/unit --detectOpenHandles --forceExit --runInBand",
+    "test:integration": "jest src/testes/integration --detectOpenHandles --forceExit --runInBand"
   },
   "author": "",
   "license": "ISC",

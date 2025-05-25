@@ -28,6 +28,7 @@ module.exports = {
     '!src/models/**',
     '!src/routes/**',
     '!src/config/**',
-    '!src/testes/setup.js'
+    '!src/testes/setup.js',
+    '!src/index.js'
   ]
 };

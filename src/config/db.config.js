@@ -18,12 +18,14 @@ const dbConfig = {
     }
 };
 
-console.log("Database Config:", {
-    host: dbConfig.host,
-    user: dbConfig.user,
-    password: dbConfig.password,
-    database: dbConfig.database,
-    port: dbConfig.port,
-});
+if (process.env.NODE_ENV !== 'test') {
+    console.log("Database Config:", {
+        host: dbConfig.host,
+        user: dbConfig.user,
+        password: dbConfig.password,
+        database: dbConfig.database,
+        port: dbConfig.port,
+    });
+};
 
 export default dbConfig;

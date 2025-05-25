@@ -1,11 +1,13 @@
 import dbConfig from '@config/db.config.js';
 import { Sequelize } from 'sequelize';
-import User from '@models/User.js';
-import Simulacao from '@models/Simulacao.js';
+import User from './User.js';
+import Simulacao from './Simulacao.js';
 import pg from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+const isTestEnvironment = process.env.NODE_ENV === 'test';
 
 const sequelize = process.env.DATABASE_URL
     ? new Sequelize(process.env.DATABASE_URL, {
@@ -24,7 +26,7 @@ const sequelize = process.env.DATABASE_URL
             idle: dbConfig.pool.idle,
             evict: dbConfig.pool.evict
         },
-        logging: console.log // Habilita logs para depuração
+        logging: isTestEnvironment ? false : console.log // Habilita logs para depuração
     })
     : new Sequelize(
         dbConfig.database,
@@ -42,7 +44,7 @@ const sequelize = process.env.DATABASE_URL
                 idle: dbConfig.pool.idle,
                 evict: dbConfig.pool.evict
             },
-            logging: console.log
+            logging: isTestEnvironment ? false : console.log
         }
     );
 
