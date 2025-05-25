@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
-import db from '../models/index.js';
+import db from '@models/index.js';
 import jwt from 'jsonwebtoken';
-import { createUser, findUserByUsername, findUserByEmail } from '../services/user.service.js';
+import { createUser, findUserByUsername, findUserByEmail } from '@services/user.service.js';
 
 const register = async (req, res) => {
     console.log("Registering user:", req.body);
@@ -44,7 +44,7 @@ const login = async (req, res) => {
     try {
         const user = await db.users.findOne({ where : { username } });
         if (!user) {
-            console.log("User not found", user.username);
+            console.log("User not found:", username);
             return res.status(404).json({ message: 'User not found' });
         }
 
