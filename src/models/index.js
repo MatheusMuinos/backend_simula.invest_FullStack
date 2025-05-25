@@ -1,7 +1,7 @@
-import dbConfig from '../config/db.config.js';
+import dbConfig from '@config/db.config.js';
 import { Sequelize } from 'sequelize';
-import User from './User.js';
-import Simulacao from './Simulacao.js';
+import User from '@models/User.js';
+import Simulacao from '@models/Simulacao.js';
 import pg from 'pg';
 import dotenv from 'dotenv';
 

@@ -1,16 +1,20 @@
-// jest.config.cjs
 module.exports = {
   testEnvironment: 'node',
-  transform: {},
+  transform: {
+    '^.+\\.js$': 'babel-jest',
+  },
   moduleNameMapper: {
-    '^@models/(.*)$': '/workspaces/backend_simula.invest_FullStack/src/models/$1',
-    '^@services/(.*)$': '/workspaces/backend_simula.invest_FullStack/src/services/$1',
-    '^@controller/(.*)$': '/workspaces/backend_simula.invest_FullStack/src/controller/$1'
+    '^@models/(.*)$': '<rootDir>/src/models/$1',
+    '^@services/(.*)$': '<rootDir>/src/services/$1',
+    '^@controller/(.*)$': '<rootDir>/src/controller/$1',
+    '^@config/(.*)$': '<rootDir>/src/config/$1',
+    '^@middlewares/(.*)$': '<rootDir>/src/middlewares/$1',
+    '^@routes/(.*)$': '<rootDir>/src/routes/$1'
   },
   globals: {
     'jest': true
   },
-  setupFilesAfterEnv: ['/workspaces/backend_simula.invest_FullStack/src/testes/setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/src/testes/setup.js'],
   coverageThreshold: {
     global: {
       branches: 60,
@@ -23,6 +27,7 @@ module.exports = {
     'src/**/*.js',
     '!src/models/**',
     '!src/routes/**',
-    '!src/config/**'
+    '!src/config/**',
+    '!src/testes/setup.js'
   ]
 };

@@ -1,4 +1,4 @@
-import simulacaoService from '../services/simulacao.service.js';
+import simulacaoService from '@services/simulacao.service.js';
 
 const logSimulation = async (req, res) => {
     try {
