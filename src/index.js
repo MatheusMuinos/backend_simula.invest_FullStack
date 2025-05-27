@@ -19,8 +19,7 @@ app.use(express.json());
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://legendary-dollop-6q7jp4qvqjv355gx-5173.app.github.dev',
-    'https://teste-gamma-eosin.vercel.app/'
+    'https://legendary-dollop-6q7jp4qvqjv355gx-5173.app.github.dev'
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
