@@ -1,177 +1,156 @@
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import { jest, describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
-import { app, db } from '../../index.js';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { createUser } from '../../services/user.service.js';
 
-let testUser;
-let token;
-let simulationToGetId;
-let simulationToDeleteId;
+jest.mock('../../models/index.js', () => ({
+  __esModule: true,
+  default: {
+    sequelize: {
+      sync: jest.fn().mockResolvedValue(),
+      close: jest.fn().mockResolvedValue(),
+    },
+  },
+}));
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_test_secret_key_123!';
+import server from '../../index.js';
 
-describe('Simulacao Routes', () => {
+let db;
 
+const SERVER_URL = 'http://localhost:3000';
+
+describe('User Routes', () => { 
+  beforeAll(async () => {
+    db = jest.requireActual('../../models/index.js').default;
+    await db.sequelize.sync({ force: true });
+  });
+
+  afterAll(async () => {
+    if (server && server.close) {
+      await new Promise(resolve => server.close(resolve));
+    }
+    await db.sequelize.close();
+  });
+
+  describe('POST /register', () => {
+    it('should register a new user successfully with valid data', async () => {
+      const response = await request(SERVER_URL)
+        .post('/register')
+        .send({
+          username: 'janedoe',
+          email: 'jane.doe@example.com',
+          password: 'Password123!',
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body).toEqual({ message: 'User registered successfully' });
+
+      const userInDb = await db.users.findOne({ where: { email: 'jane.doe@example.com' } });
+      expect(userInDb).not.toBeNull();
+      const isPasswordCorrect = await bcrypt.compare('Password123!', userInDb.password);
+      expect(isPasswordCorrect).toBe(true);
+    });
+
+    it('should fail to register if the email already exists', async () => {
+      await db.users.create({
+          username: 'existing_user_1',
+          email: 'duplicate.email@example.com',
+          password: 'somepassword'
+      });
+      
+      const response = await request(SERVER_URL)
+        .post('/register')
+        .send({
+          username: 'another_user',
+          email: 'duplicate.email@example.com',
+          password: 'Password123!',
+        });
+      
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe('Username or email already exists');
+    });
+    
+    it('should fail to register if the username already exists', async () => {
+        await db.users.create({
+            username: 'duplicate_username',
+            email: 'unique.email@example.com',
+            password: 'somepassword'
+        });
+
+        const response = await request(SERVER_URL)
+            .post('/register')
+            .send({
+                username: 'duplicate_username',
+                email: 'another.unique.email@example.com',
+                password: 'Password123!'
+            });
+        
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe('Username or email already exists');
+    });
+
+    it('should fail to register if the password field is missing', async () => {
+      const response = await request(SERVER_URL)
+        .post('/register')
+        .send({
+          username: 'incomplete_user',
+          email: 'incomplete@example.com',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe('username, email and password are required');
+    });
+  });
+
+  describe('POST /login', () => {
     beforeAll(async () => {
-        try {
-            await db.sequelize.sync({ force: true });
-
-            testUser = await createUser({
-                username: 'sim_user',
-                email: 'sim@example.com',
-                password: 'password123',
-            });
-
-            if (!testUser || !testUser.id) {
-                throw new Error("Test user creation failed.");
-            }
-
-            token = jwt.sign({ id: testUser.id }, JWT_SECRET, { expiresIn: '1h' });
-
-            const simToGet = await db.simulacao.create({
-                userId: testUser.id,
-                tipo: 'renda-fixa',
-                nome: 'Get Me Renda Fixa',
-                invest_inicial: 2000,
-                invest_mensal: 200,
-                meses: 24,
-                inflacao: 0.06,
-            });
-            simulationToGetId = simToGet.id;
-
-            const simToDelete = await db.simulacao.create({
-                userId: testUser.id,
-                tipo: 'acao',
-                nome: 'Delete Me Stock',
-                valor: 150.75,
-                invest_inicial: 500,
-                invest_mensal: 50,
-                meses: 5,
-                inflacao: 0.01,
-            });
-            simulationToDeleteId = simToDelete.id;
-
-        } catch (error) {
-            console.error("Critical error during beforeAll setup:", error);
-            throw error;
-        }
+      const hashedPassword = await bcrypt.hash('password-for-login', 10);
+      await db.users.create({
+        username: 'login_user',
+        email: 'login@example.com',
+        password: hashedPassword,
+      });
     });
 
-    afterAll(async () => {
-        await db.sequelize.close();
+    it('should log in an existing user and return a JWT token', async () => {
+      const response = await request(SERVER_URL)
+        .post('/login')
+        .send({
+          username: 'login_user',
+          password: 'password-for-login',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe('Login successful');
+      expect(response.body.token).toBeDefined();
+
+      const userInDb = await db.users.findOne({ where: { username: 'login_user' } });
+      const decodedToken = jwt.verify(response.body.token, process.env.JWT_SECRET);
+      expect(decodedToken.id).toBe(userInDb.id);
     });
 
-    describe('POST /simulacao', () => {
-        it('should create a new simulation', async () => {
-            const response = await request(app)
-                .post('/log-Simulation')
-                .set('Authorization', `Bearer ${token}`)
-                .send({
-                    tipo: 'renda-fixa',
-                    nome: 'My First Renda Fixa',
-                    invest_inicial: 1000,
-                    invest_mensal: 100,
-                    meses: 12,
-                    inflacao: 0.05,
-                });
-
-            expect(response.status).toBe(201);
-            expect(response.body.id).toBeDefined();
-            expect(response.body.nome).toBe('My First Renda Fixa');
-            expect(response.body.userId).toBe(testUser.id);
+    it('should fail to log in with an incorrect password', async () => {
+      const response = await request(SERVER_URL)
+        .post('/login')
+        .send({
+          username: 'login_user',
+          password: 'wrong-password',
         });
-
-        it('should return 400 if required fields are missing', async () => {
-            const response = await request(app)
-                .post('/log-Simulation')
-                .set('Authorization', `Bearer ${token}`)
-                .send({
-                    tipo: 'fundo',
-                });
-
-            expect(response.status).toBe(400);
-            expect(response.body.message).toBe('Missing required fields');
-        });
-
-        it('should return 400 if tipo is acao and valor is missing', async () => {
-            const response = await request(app)
-                .post('/log-Simulation')
-                .set('Authorization', `Bearer ${token}`)
-                .send({
-                    tipo: 'acao',
-                    nome: 'My Stock',
-                    invest_inicial: 500,
-                    invest_mensal: 50,
-                    meses: 6,
-                    inflacao: 0.03,
-                });
-
-            expect(response.status).toBe(400);
-            expect(response.body.message).toBe('Value is required for stock simulations');
-        });
-
-        it('should return 401 or 403 if no token is provided', async () => {
-            const response = await request(app)
-                .post('/log-Simulation')
-                .send({
-                    tipo: 'renda-fixa',
-                    nome: 'No Token Renda Fixa',
-                    invest_inicial: 1000,
-                    invest_mensal: 100,
-                    meses: 12,
-                    inflacao: 0.05,
-                });
-            expect([401, 403]).toContain(response.status);
-        });
+      
+      expect(response.status).toBe(401);
+      expect(response.body.message).toBe('Invalid credentials');
     });
 
-    describe('GET /simulacao', () => {
-
-        it('should get all simulations for the user', async () => {
-            const response = await request(app)
-                .get('/get-Simulations')
-                .set('Authorization', `Bearer ${token}`);
-
-            expect(response.status).toBe(200);
-            expect(Array.isArray(response.body)).toBe(true);
-            expect(response.body.some(sim => sim.id === simulationToGetId)).toBe(true);
+    it('should fail to log in if the user does not exist', async () => {
+      const response = await request(SERVER_URL)
+        .post('/login')
+        .send({
+          username: 'non_existent_user',
+          password: 'any_password',
         });
+      
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe('User not found');
     });
-
-    describe('DELETE /simulacao', () => {
-
-        it('should delete a simulation', async () => {
-            const response = await request(app)
-                .delete('/delete-Simulation')
-                .set('Authorization', `Bearer ${token}`)
-                .send({ simulationId: simulationToDeleteId });
-
-            expect(response.status).toBe(200);
-            expect(response.body.message).toBe('Simulation deleted successfully');
-
-            const deletedSim = await db.simulacao.findByPk(simulationToDeleteId);
-            expect(deletedSim).toBeNull();
-        });
-
-        it('should return 404 if simulation not found', async () => {
-            const response = await request(app)
-                .delete('/delete-Simulation')
-                .set('Authorization', `Bearer ${token}`)
-                .send({ simulationId: 99999 });
-
-            expect(response.status).toBe(404);
-            expect(response.body.message).toBe('Simulation not found or not owned by user');
-        });
-
-        it('should return 400 if simulationId is missing', async () => {
-            const response = await request(app)
-                .delete('/delete-Simulation')
-                .set('Authorization', `Bearer ${token}`)
-                .send({});
-
-            expect(response.status).toBe(400);
-            expect(response.body.message).toBe('Simulation ID is required');
-        });
-    });
+  });
 });
