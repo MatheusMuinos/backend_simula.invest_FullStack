@@ -36,11 +36,6 @@ const login = async (req, res) => {
 
     const { username, email, password } = req.body;
 
-    if ((!email && !username) || !password) {
-        console.log("Email or username, and password are required", email, username);
-        return res.status(400).json({ message: 'Email and password are required' });
-    }
-
     try {
         const user = await db.users.findOne({ where : { username } });
         if (!user) {
