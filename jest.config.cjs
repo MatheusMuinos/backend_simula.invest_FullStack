@@ -11,9 +11,6 @@ module.exports = {
     '^@middlewares/(.*)$': '<rootDir>/src/middlewares/$1',
     '^@routes/(.*)$': '<rootDir>/src/routes/$1'
   },
-  globals: {
-    'jest': true
-  },
   setupFilesAfterEnv: ['<rootDir>/src/testes/setup.js'],
   coverageThreshold: {
     global: {
