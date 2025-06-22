@@ -108,5 +108,6 @@ router.get('/get-Simulations', verifyToken, simulacaoController.getSimulations);
  *         description: Não autorizado
  */
 router.delete('/delete-Simulation', verifyToken, simulacaoController.deleteSimulations);
+router.patch('/patch-simulation', verifyToken, simulacaoController.patchSimulation);
 
 export default router;

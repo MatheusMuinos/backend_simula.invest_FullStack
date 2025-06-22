@@ -58,8 +58,36 @@ const deleteSimulations = async (req, res) => {
     }
 };
 
+const patchSimulation = async (req, res) => {
+    try {
+        const { simulationId, ...updateData } = req.body;
+
+        if (!simulationId) {
+            return res.status(400).json({ message: "Simulation ID is required in the request body." });
+        }
+        
+        delete updateData.id;
+        delete updateData.userId;
+        
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ message: "No update fields provided." });
+        }
+        
+        const updatedSimulation = await simulacaoService.patchSimulation(req.userId, simulationId, updateData);
+
+        if (!updatedSimulation) {
+            return res.status(404).json({ message: "Simulation not found or you don't have permission to edit it." });
+        }
+
+        res.status(200).json(updatedSimulation);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 export default {
     logSimulation,
     getSimulations,
-    deleteSimulations
+    deleteSimulations,
+    patchSimulation
 };
