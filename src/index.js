@@ -21,7 +21,7 @@ app.use(cors({
     'http://localhost:5173', // Front Local
     'http://localhost:3000', // Front Local
     'https://legendary-dollop-6q7jp4qvqjv355gx-5173.app.github.dev', // Front Local
-    'https://simula-invest-full-stack-jbpj.vercel.app' // Front Vercel
+    'https://simula-invest-full-stack-jbpj.vercel.app', // Front Vercel
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
