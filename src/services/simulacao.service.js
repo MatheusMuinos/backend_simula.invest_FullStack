@@ -35,8 +35,30 @@ const deleteSimulation = async (userId, simulationId) => {
     }
 };
 
+const patchSimulation = async (userId, simulationId, updateData) => {
+    try {
+        const simulation = await db.simulacao.findOne({
+            where: {
+                id: simulationId,
+                userId: userId
+            }
+        });
+
+        if (!simulation) {
+            return null;
+        }
+
+        const updatedSimulation = await simulation.update(updateData);
+        
+        return updatedSimulation;
+    } catch (error) {
+        throw new Error(`Error updating simulation: ${error.message}`);
+    }
+};
+
 export default {
     createSimulation,
     getSimulationsByUser,
-    deleteSimulation
+    deleteSimulation,
+    patchSimulation
 };
