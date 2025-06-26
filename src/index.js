@@ -21,7 +21,8 @@ app.use(cors({
     'http://localhost:5173', // Front Local
     'http://localhost:3000', // Front Local
     'https://legendary-dollop-6q7jp4qvqjv355gx-5173.app.github.dev', // Front Local
-    'https://animated-doodle-r4p4g54gj474f5gpp-5173.app.github.dev', // Front Teste Matheus 
+    'https://animated-doodle-r4p4g54gj474f5gpp-5173.app.github.dev', // Front Teste Matheus
+    'https://probable-disco-v9p9677jgq5fx6vj-5173.app.github.dev' //Front Teste Danilo
     'https://simula-invest-full-stack-jbpj.vercel.app', // Front Vercel
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
